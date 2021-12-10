@@ -53,7 +53,7 @@ def match_template(image, template):
 
 
 def main():
-    img = cv2.imread('nanonet.jpg')
+    img = cv2.imread('images/nanonet.jpg')
     gray = get_grayscale(img)
     gray_3_channel = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR) # need to convert to 3 channels to concatenate with original image
     image_gray_horizontal = np.hstack((img, gray_3_channel))
@@ -72,7 +72,7 @@ def main():
     #closing all open windows 
     cv2.destroyAllWindows() 
 
-    with open('nanonet.txt', 'w', encoding='utf-8') as f:
+    with open('output_text_files/nanonet.txt', 'w', encoding='utf-8') as f:
         f.write(convert_img_to_txt(gray))
 
 if __name__ == '__main__':
