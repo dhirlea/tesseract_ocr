@@ -14,7 +14,7 @@ def main():
             img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
     alphanumeric = u'[a-zA-Z0-9]+'
     document_text = [sequence for sequence in d['text'] if re.search(alphanumeric, sequence)]
-    with open('output_text_files/receipt.txt','w') as f:
+    with open('output_text_files/receipt.txt','w', encoding='utf-8') as f:
         for sequence in document_text:
             f.write(sequence + '\n')
     cv2.imshow('img', img)
