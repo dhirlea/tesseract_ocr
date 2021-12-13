@@ -1,4 +1,5 @@
 import cv2
+import re
 import pytesseract
 from pytesseract import Output
 
@@ -11,7 +12,11 @@ def main():
         if int(float(d['conf'][i])) > 60:
             (x, y, w, h) = (d['left'][i], d['top'][i], d['width'][i], d['height'][i])
             img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
+    alphanumeric = u'[a-zA-Z0-9]+'
+    document_text = [sequence for sequence in d['text'] if re.search(alphanumeric, sequence)]
+    with open('output_text_files/receipt.txt','w') as f:
+        for sequence in document_text:
+            f.write(sequence + '\n')
     cv2.imshow('img', img)
     cv2.waitKey(0)
 
