@@ -3,6 +3,7 @@ import re
 import pytesseract
 from pytesseract import Output
 
+
 def load_image(img_path, config):
     image = cv2.imread(img_path)
     image_data = pytesseract.image_to_data(image, output_type=Output.DICT, config=config)
@@ -29,7 +30,7 @@ def main():
     img_path = 'images/invoice.jpg'
     file_path = 'output_text_files/invoice.txt'
     custom_config = r'--oem 3 --psm 3'
-    
+
     img, image_data = load_image(img_path, custom_config)
     image_to_txt(image_data, file_path)
     plot_image_with_boxes(img, image_data)
