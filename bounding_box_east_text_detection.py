@@ -1,4 +1,5 @@
 import cv2
+import os
 import re
 import numpy as np
 import argparse
@@ -7,34 +8,27 @@ import pytesseract
 from pytesseract import Output
 from imutils.object_detection import non_max_suppression
 
-
-def load_image(img_path, config):
-    image = cv2.imread(img_path)
-    image_data = pytesseract.image_to_data(image, output_type=Output.DICT, config=config)
-    return image, image_data
-
-def plot_image_with_boxes(image, image_data):
-    n_boxes = len(image_data['text'])
-    for i in range(n_boxes):
-        if int(float(image_data['conf'][i])) > 60:
-            (x, y, w, h) = (image_data['left'][i], image_data['top'][i], image_data['width'][i], image_data['height'][i])
-            img = cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-    cv2.imshow('Image', img)
-    cv2.waitKey(0)
-
-def image_to_txt(image_data, file_path):
+def convert_img_to_txt(image, file_path, configuration = None):
+    """ Utility function to convert custom image into text file
+    """
+    image_data = pytesseract.image_to_data(image, output_type=Output.DICT, config=configuration)
     alphanumeric = u'[a-zA-Z0-9]+'
     document_text = [sequence for sequence in image_data['text'] if re.search(alphanumeric, sequence)]
-    with open(file_path,'w', encoding='utf-8') as f:
+    with open(file_path, 'a', encoding='utf-8') as f:
         for sequence in document_text:
-            f.write(sequence + '\n')
+            f.write(sequence +'\n')
 
 def main():
 
     img_path = 'images/invoice.jpg'
     east_detector_path = 'frozen_east_text_detection.pb'
     file_path = 'output_text_files/invoice.txt'
-    custom_config = r'--oem 3 --psm 3'
+    custom_config = r'--oem 3 --psm 7'
+
+    file_dir = file_path.split('/')[0]
+    file_name = file_path.split('/')[1]
+    if file_name in os.listdir(os.getcwd()+'\\'+file_dir):
+        os.remove(os.getcwd()+'\\'+file_path)
 
     # construct the argument parser and parse the arguments
     ap = argparse.ArgumentParser()
@@ -44,9 +38,9 @@ def main():
                     help="path to input EAST text detector")
     ap.add_argument("-c", "--min-confidence", type=float, default=0.5,
                     help="minimum probability required to inspect a region")
-    ap.add_argument("-w", "--width", type=int, default=960,
+    ap.add_argument("-w", "--width", type=int, default=640,
                     help="resized image width (should be multiple of 32)")
-    ap.add_argument("-e", "--height", type=int, default=960,
+    ap.add_argument("-e", "--height", type=int, default=640,
                     help="resized image height (should be multiple of 32)")
     args = vars(ap.parse_args())
 
@@ -128,6 +122,7 @@ def main():
             h = xData0[x] + xData2[x]
             w = xData1[x] + xData3[x]
 
+
             # compute both the starting and ending (x, y)-coordinates for
             # the text prediction bounding box
             endX = int(offsetX + (cos * xData1[x]) + (sin * xData2[x]))
@@ -144,6 +139,7 @@ def main():
     # boxes
     boxes = non_max_suppression(np.array(rects), probs=confidences)
 
+    subimages = []
     # loop over the bounding boxes
     for (startX, startY, endX, endY) in boxes:
         # scale the bounding box coordinates based on the respective
@@ -155,6 +151,11 @@ def main():
 
         # draw the bounding box on the image
         cv2.rectangle(orig, (startX, startY), (endX, endY), (0, 255, 0), 2)
+        subimage = orig[startY:endY, startX:endX]
+        subimages.append(subimage)
+         
+    for subimage in subimages:
+        convert_img_to_txt(subimage, file_path, custom_config)
 
     # show the output image
     cv2.imshow("Text Detection", orig)
