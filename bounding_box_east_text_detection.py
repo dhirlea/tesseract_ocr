@@ -5,25 +5,23 @@ import numpy as np
 import argparse
 import time
 import pytesseract
-from pytesseract import Output
 from imutils.object_detection import non_max_suppression
 
 def convert_img_to_txt(image, file_path, configuration = None):
     """ Utility function to convert custom image into text file
     """
-    image_data = pytesseract.image_to_data(image, output_type=Output.DICT, config=configuration)
+    image_string = pytesseract.image_to_string(image, config=configuration)
     alphanumeric = u'[a-zA-Z0-9]+'
-    document_text = [sequence for sequence in image_data['text'] if re.search(alphanumeric, sequence)]
     with open(file_path, 'a', encoding='utf-8') as f:
-        for sequence in document_text:
-            f.write(sequence +'\n')
+        if re.search(alphanumeric, image_string):
+            f.write(image_string +'\n')
 
 def main():
 
-    img_path = 'images/invoice.jpg'
+    img_path = 'images/lebron.jpg'
     east_detector_path = 'frozen_east_text_detection.pb'
-    file_path = 'output_text_files/invoice.txt'
-    custom_config = r'--oem 3 --psm 7'
+    file_path = 'output_text_files/lebron.txt'
+    custom_config = r'--oem 3 --psm 8'
 
     file_dir = file_path.split('/')[0]
     file_name = file_path.split('/')[1]
